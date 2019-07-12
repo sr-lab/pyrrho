@@ -46,10 +46,10 @@ def print_help ():
     print('\t\t3: Heavy-tail mode, places probability from all eliminated outcomes into most frequent outcome')
     print()
     print('Input file should be in CSV format:')
-    print('\tpassword, ... <- Column headers')
-    print('\t123456, ...')
-    print('\thunter, ...')
-    print('\tmatrix, ...')
+    print('\tpassword, probability, ... <- Column headers')
+    print('\t123456, 0.04362, ...')
+    print('\thunter, 0.03712, ...')
+    print('\tmatrix, 0.14325, ...')
 
 
 # If no options specified, print usage and exit.
