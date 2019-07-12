@@ -110,6 +110,10 @@ if words is None:
 # Read data frame from file.
 df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True, encoding='latin-1')
 
+# Sort by probability.
+df.sort_values(by=['probability'], ascending=False, inplace=True)
+df.reset_index(drop=True, inplace=True)
+
 # Get total probability.
 total_prob = sum(df['probability'])
 
