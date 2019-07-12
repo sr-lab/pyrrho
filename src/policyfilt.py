@@ -81,6 +81,9 @@ classes = get_int_valued_arg('c')
 words = get_int_valued_arg('w')
 invert = is_arg_passed('i')
 
+# Get redistribution mode.
+redist_mode = 0 if not is_arg_passed('m') else get_int_valued_arg('m')
+
 # Get output path if one was specified.
 out = get_valued_arg('o')
 
@@ -107,8 +110,22 @@ if words is None:
 # Read data frame from file.
 df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True, encoding='latin-1')
 
+# Get total probability.
+total_prob = sum(df['probability'])
+
 # Filter passwords.
 df = df[df.apply(lambda x: complies(str(x['password']), length, lowers, uppers, digits, symbols, letters, classes, words, [], invert), axis=1)]
+
+# Get probability after filtration.
+filtered_prob = sum(df['probability'])
+
+surplus = total_prob - filtered_prob
+print('Surplus probability:', surplus)
+
+row_count = len(df.index)
+print('Rows after filtration:', row_count)
+
+print(surplus / row_count)
 
 # TODO: Redistribution modes!
 
