@@ -116,18 +116,20 @@ total_prob = sum(df['probability'])
 # Filter passwords.
 df = df[df.apply(lambda x: complies(str(x['password']), length, lowers, uppers, digits, symbols, letters, classes, words, [], invert), axis=1)]
 
-# Get probability after filtration.
+# Get 'surplus' probability.
 filtered_prob = sum(df['probability'])
-
 surplus = total_prob - filtered_prob
-print('Surplus probability:', surplus)
-
 row_count = len(df.index)
-print('Rows after filtration:', row_count)
 
-print(surplus / row_count)
-
-# TODO: Redistribution modes!
+# Soft filtration, flag noncompliant passwords as unguessable.
+if redist_mode == 1:
+    pass
+elif redist_mode == 2:
+    ech = surplus / row_count
+    for i, row in df.iterrows():
+        df.loc[i, 'probability'] += ech
+elif redist_mode == 3:
+    df.loc[0, 'probability'] += surplus
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)

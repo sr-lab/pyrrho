@@ -1,4 +1,4 @@
-def load_file_lines(file):
+def load_file_lines (file):
     """ Loads a file as a list of lines.
 
     Args:

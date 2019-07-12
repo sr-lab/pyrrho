@@ -3,7 +3,7 @@ import os
 import math
 import pandas as pd
 
-from shared.fileloading import load_lines
+from shared.fileloading import load_file_lines
 from shared.args import get_valued_arg, is_arg_passed, split_multi_arg
 
 
@@ -69,6 +69,7 @@ cumulative = 0
 entries = len(df.index)
 cycle_len = math.floor(entries / 100) if perc_mode else 1
 counter = 0
+print(cumulative, file=output_stream)
 for index, row in df.iterrows():
     cumulative += row['probability']
     if counter % cycle_len == 0 or counter == entries:
