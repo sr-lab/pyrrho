@@ -7,6 +7,10 @@ from shared.fileloading import load_file_lines
 from shared.args import get_valued_arg, is_arg_passed, split_multi_arg
 
 
+# Obviously, percentile means a 100th.
+PERCENTILE_DENOM = 100
+
+
 def print_usage (show_help_line=False):
     """ Prints the short help card for the program.
     """
@@ -64,14 +68,20 @@ df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True)
 df.sort_values(by=['probability'], ascending=False, inplace=True)
 df.reset_index(drop=True, inplace=True)
 
-# Print cumulative probability/frequency.
-cumulative = 0
+# How many rows total?
 entries = len(df.index)
-cycle_len = math.floor(entries / 100) if perc_mode else 1
-counter = 0
-print(cumulative, file=output_stream)
+
+# Keep track of cumulative probability.
+cumulative = 0
+
+# Sampling interval.
+interval = math.floor(entries / PERCENTILE_DENOM) if perc_mode else 1
+
+# Print cumulative probability/frequency.
+points = 0
 for index, row in df.iterrows():
-    cumulative += row['probability']
-    if counter % cycle_len == 0 or counter == entries:
+    if index % interval == 0 and points < PERCENTILE_DENOM - 1: # Don't collect too many data points.
         print(cumulative, file=output_stream)
-    counter += 1
+        points += 1
+    cumulative += row['probability']
+print(cumulative, file=output_stream)
