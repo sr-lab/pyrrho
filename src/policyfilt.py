@@ -127,7 +127,8 @@ row_count = len(df.index)
 
 # Soft filtration, flag noncompliant passwords as unguessable.
 if redist_mode == 1:
-    pass
+    for i, row in df.iterrows():
+        df.loc[i, 'probability'] /= total_prob
 elif redist_mode == 2:
     ech = surplus / row_count
     for i, row in df.iterrows():
