@@ -115,14 +115,14 @@ df.sort_values(by=['probability'], ascending=False, inplace=True)
 df.reset_index(drop=True, inplace=True)
 
 # Get total probability.
-total_prob = sum(df['probability'])
+total_prob = df['probability'].sum()
 
 # Filter passwords and reset index again.
 df = df[df.apply(lambda x: complies(str(x['password']), length, lowers, uppers, digits, symbols, letters, classes, words, [], invert), axis=1)]
 df.reset_index(drop=True, inplace=True)
 
 # Get 'surplus' probability.
-filtered_prob = sum(df['probability'])
+filtered_prob = df['probability'].sum()
 surplus = total_prob - filtered_prob
 row_count = len(df.index)
 
