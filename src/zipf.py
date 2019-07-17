@@ -35,7 +35,7 @@ def print_usage (show_help_line=False):
     Args:
         show_help_line (bool): If true, information on help flag `-h` will be printed.
     """
-    print('Usage: python zipf.py [-hpcl] [-m <mag>] [-o <outfile>] [-eq <eqfile>] [-t <title>] <infile>')
+    print('Usage: python zipf.py [-hcls] [-o <outfile>] [-eq <eqfile>] [-t <title>] <infile>')
     print('Fits a powerlaw equation to a password frequency distribution.')
     if show_help_line:
         print('For extended help use \'-h\' option.')
@@ -54,6 +54,7 @@ def print_help ():
     print('\t-o <str>: The file in which to place output figure')
     print('\t-eq <str>: Specify the output file in which to serialize the regression line equation')
     print('\t-t <str>: The plot title')
+    print('\t-s: Suppress the plot window')
     print()
     print('Input file should be in CSV format:')
     print('\tpassword, frequency, ... <- Column headers')
