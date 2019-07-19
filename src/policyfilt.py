@@ -110,29 +110,28 @@ if words is None:
 # Read data frame from file.
 df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True, encoding='latin-1')
 
-# Sort by probability.
+# Sort by probability and reset index.
 df.sort_values(by=['probability'], ascending=False, inplace=True)
 df.reset_index(drop=True, inplace=True)
 
 # Get total probability.
-total_prob = sum(df['probability'])
+total_prob = df['probability'].sum()
 
-# Filter passwords.
+# Filter passwords and reset index again.
 df = df[df.apply(lambda x: complies(str(x['password']), length, lowers, uppers, digits, symbols, letters, classes, words, [], invert), axis=1)]
+df.reset_index(drop=True, inplace=True)
 
 # Get 'surplus' probability.
-filtered_prob = sum(df['probability'])
+filtered_prob = df['probability'].sum()
 surplus = total_prob - filtered_prob
 row_count = len(df.index)
 
 # Soft filtration, flag noncompliant passwords as unguessable.
 if redist_mode == 1:
-    for i, row in df.iterrows():
-        df.loc[i, 'probability'] /= filtered_prob
+    df['probability'] /= filtered_prob
 elif redist_mode == 2:
     ech = surplus / row_count
-    for i, row in df.iterrows():
-        df.loc[i, 'probability'] += ech
+    df['probability'] += ech
 elif redist_mode == 3:
     df.loc[0, 'probability'] += surplus
 
