@@ -61,7 +61,7 @@ password, probability
 "matrix", 0.166666667
 ```
 
-### Convergent Reselection (Worse Case)
+### Convergent Reselection (Worst Case)
 If we assume the worst, for every password we ban, all users who would previously have chosen that password will gravitate towards (i.e. *converge on*) the most common one. To simulate this, we simply add the probability of the banned password straight on to the most common remaining password in the distribution:
 
 ```
@@ -79,24 +79,12 @@ To run the demo, first take a look at the file in `/tasks/sample.json`:
   "out": "../results",
   "modes": [1, 2, 3],
   "files": ["../data/singles.probs"],
-  "policies": [
-    {
-      "name": "basic8",
-      "length": 8
-    }, {
-      "name": "2word8",
-      "length": 8,
-      "words": 2
-    }, {
-      "name": "3class8",
-      "length": 8,
-      "classes": 3
-    }
-  ]
+  "authority": "./authority.native",
+  "policies": ["basic8", "basic7", "basic6"]
 }
 ```
 
-This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\] (for more specific information about policy format, see documentation for `/src/policyfilt.py`). Modes are as follows:
+This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\]. Actual password composition policy enforcement is carried out by a [Skeptic authority](https://github.com/sr-lab/skeptic-authority-template), which must be compiled and referenced from the `authority` field. All specified policies must be understood by the authority, for more instructions consult [the Skeptic authority template repository](https://github.com/sr-lab/skeptic-authority-template). Modes are as follows:
 
 1. Proportional Reselection
 2. Uniform Reselection
@@ -110,9 +98,6 @@ python3 pyrrho.py ../tasks/sample.json
 ```
 
 You'll notice probability distributions under each redistribution mode and corresponding JSON files containing fitted power-law curves in the `/results` directory when the tool has finished running.
-
-## Next Steps
-This version of Pyrrho currently relies on a very basic Python implementation of password composition policies for proof-of-concept purposes. As a next step, we plan to integrate the tool properly into Skeptic by making it compatible with [Skeptic authorities](https://github.com/sr-lab/skeptic-authority-template). This will permit reasoning about software-specific password composition policy representations from within Coq and applying them to various password probability distributions.
 
 ## References
 1. Saranga Komanduri, Richard Shay, Patrick Gage Kelley, Michelle L. Mazurek, Lujo Bauer, Nicolas Christin, Lorrie Faith Cranor, and Serge Egelman. 2011. Of passwords and people: measuring the effect of password-composition policies. In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI '11). ACM, New York, NY, USA, 2595-2604. DOI: https://doi.org/10.1145/1978942.1979321
