@@ -43,7 +43,7 @@ for file in task.files:
             print('In mode', mode, f'({MODE_LOOKUP[mode]}) redistributing...')
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy.name, mode)
-            subprocess.check_output(['python', 'policyfilt.py',
+            subprocess.check_output(['python3', 'policyfilt.py',
                 '-n', str(policy.length),
                 '-l', str(policy.lowers),
                 '-u', str(policy.uppers),
@@ -58,6 +58,6 @@ for file in task.files:
                 file])
             # Run optimal attack projection, sampling at percentiles.
             print('Running optimal attack projection (percentile sampling)...')
-            subprocess.check_output(['python', 'optimalguess.py', '-c',
+            subprocess.check_output(['python3', 'optimalguess.py', '-c',
                 '-o', compute_out_path(task.out, file, policy.name, mode, 'log'),
                 out_path])
