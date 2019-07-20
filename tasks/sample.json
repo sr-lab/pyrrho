@@ -2,18 +2,6 @@
   "out": "../results",
   "modes": [1, 2, 3],
   "files": ["../data/singles.probs"],
-  "policies": [
-    {
-      "name": "basic8",
-      "length": 8
-    }, {
-      "name": "2word8",
-      "length": 8,
-      "words": 2
-    }, {
-      "name": "3class8",
-      "length": 8,
-      "classes": 3
-    }
-  ]
+  "authority": "./authority.native",
+  "policies": ["basic8", "basic7", "basic6"]
 }

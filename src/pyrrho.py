@@ -37,27 +37,20 @@ for file in task.files:
     print('Now working on file:', file)
     # For each policy the task specifies.
     for policy in task.policies:
-        print('Redistributing for policy:', policy.name)
+        print('Redistributing for policy:', policy)
         # For each mode the task specifies.
         for mode in task.modes:
             print('In mode', mode, f'({MODE_LOOKUP[mode]}) redistributing...')
             # Run policy filtration/distribution renormalization script.
-            out_path = compute_out_path(task.out, file, policy.name, mode)
-            subprocess.check_output(['python3', 'policyfilt.py',
-                '-n', str(policy.length),
-                '-l', str(policy.lowers),
-                '-u', str(policy.uppers),
-                '-d', str(policy.digits),
-                '-s', str(policy.others),
-                '-a', str(policy.letters),
-                '-c', str(policy.classes),
-                '-w', str(policy.words),
-                '-i' if policy.invert else '', # TODO: Support special requirements.
+            out_path = compute_out_path(task.out, file, policy, mode)
+            subprocess.check_output(['python3', 'authfilt.py',
+                '-a', task.authority,
+                '-p', policy,
                 '-m', str(mode),
                 '-o', out_path,
                 file])
             # Run optimal attack projection, sampling at percentiles.
             print('Running optimal attack projection (percentile sampling)...')
             subprocess.check_output(['python3', 'optimalguess.py', '-c',
-                '-o', compute_out_path(task.out, file, policy.name, mode, 'log'),
+                '-o', compute_out_path(task.out, file, policy, mode, 'log'),
                 out_path])
