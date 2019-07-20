@@ -6,9 +6,9 @@ Automated password composition policy selection.
 ## Overview
 Pyrrho, named after the first Greek skeptic philosopher [Pyrrho of Elis](https://en.wikipedia.org/wiki/Pyrrho) makes up the core of the Skeptic password composition policy evaluation framework. Written in Python, it does a few things:
 
-* Filters password probability distributions derived from large password datasets according to user-specified password composition policies (rules around password creation).
+* Filters password probability distributions derived from large password datasets according to user-specified password composition policies (rules around password creation). Policy naming in this project mostly follows the Shay/Komanduri conventions \[1\].
 * Redistributes probability in these distributions in a number of different redistribution modes, with the aim of capturing a variety of broad user password selectiono behaviours.
-* Fits power-law equations to the resulting distributions to permit selection of password composition policies based on the level of uniformity they induce under different redistribution modes.
+* Fits power-law equations to the resulting distributions to permit selection of password composition policies based on the level of uniformity they induce under different redistribution modes. This draws on research by Malone and Maher \[2\] and Wang et al. \[3\] into [Zipf's law](https://en.wikipedia.org/wiki/Zipf%27s_law) in passwords.
 
 The end result is automated password composition policy ranking.
 
@@ -96,13 +96,13 @@ To run the demo, first take a look at the file in `/tasks/sample.json`:
 }
 ```
 
-This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` (for more specific information about policy format, see documentation for `/src/policyfilt.py`). Modes are as follows:
+This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\] (for more specific information about policy format, see documentation for `/src/policyfilt.py`). Modes are as follows:
 
 1. Proportional Reselection
 2. Uniform Reselection
 3. Convergent Reselection
 
-For testing purposes, a probability distribution derived from passwords in the relatively small *singles.org* dataset is included under `/data`. To see the tool in action, run the following and take a look in the `/results` directory:
+For testing purposes, a probability distribution derived from passwords in the relatively small *singles.org* dataset from [SecLists](https://github.com/danielmiessler/seclists) is included under `/data`. To see the tool in action, run the following and take a look in the `/results` directory:
 
 ```bash
 cd src
@@ -113,3 +113,8 @@ You'll notice probability distributions under each redistribution mode and corre
 
 ## Next Steps
 This version of Pyrrho currently relies on a very basic Python implementation of password composition policies for proof-of-concept purposes. As a next step, we plan to integrate the tool properly into Skeptic by making it compatible with [Skeptic authorities](https://github.com/sr-lab/skeptic-authority-template). This will permit reasoning about software-specific password composition policy representations from within Coq and applying them to various password probability distributions.
+
+## References
+1. Saranga Komanduri, Richard Shay, Patrick Gage Kelley, Michelle L. Mazurek, Lujo Bauer, Nicolas Christin, Lorrie Faith Cranor, and Serge Egelman. 2011. Of passwords and people: measuring the effect of password-composition policies. In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI '11). ACM, New York, NY, USA, 2595-2604. DOI: https://doi.org/10.1145/1978942.1979321
+2. David Malone and Kevin Maher. 2012. Investigating the distribution of password choices. In Proceedings of the 21st international conference on World Wide Web (WWW '12). ACM, New York, NY, USA, 301-310. DOI: https://doi.org/10.1145/2187836.2187878
+3. Ding Wang, Haibo Cheng, Ping Wang, Xinyi Huang, and Gaopeng Jian. 2017. Zipf’s Law in Passwords. IEEE Transactions on Information Forensics and Security. 12. 2776-2791. DOI: https://doi.org/10.1109/TIFS.2017.2721359
