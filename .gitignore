@@ -125,3 +125,9 @@ dmypy.json
 
 # Data
 *.csv
+
+# Results
+/results/*
+
+# Kept directories
+!/**/.gitkeep
