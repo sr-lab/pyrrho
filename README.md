@@ -71,5 +71,45 @@ password, probability
 "matrix", 0.142857143
 ```
 
+## Running
+To run the demo, first take a look at the file in `/tasks/sample.json`:
+
+```json
+{
+  "out": "../results",
+  "modes": [1, 2, 3],
+  "files": ["../data/singles.probs"],
+  "policies": [
+    {
+      "name": "basic8",
+      "length": 8
+    }, {
+      "name": "2word8",
+      "length": 8,
+      "words": 2
+    }, {
+      "name": "3class8",
+      "length": 8,
+      "classes": 3
+    }
+  ]
+}
+```
+
+This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` (for more specific information about policy format, see documentation for `/src/policyfilt.py`). Modes are as follows:
+
+1. Proportional Reselection
+2. Uniform Reselection
+3. Convergent Reselection
+
+For testing purposes, a probability distribution derived from passwords in the relatively small *singles.org* dataset is included under `/data`. To see the tool in action, run the following and take a look in the `/results` directory:
+
+```bash
+cd src
+python3 pyrrho.py ../tasks/sample.json
+```
+
+You'll notice probability distributions under each redistribution mode and corresponding JSON files containing fitted power-law curves in the `/results` directory when the tool has finished running.
+
 ## Next Steps
 This version of Pyrrho currently relies on a very basic Python implementation of password composition policies for proof-of-concept purposes. As a next step, we plan to integrate the tool properly into Skeptic by making it compatible with [Skeptic authorities](https://github.com/sr-lab/skeptic-authority-template). This will permit reasoning about software-specific password composition policy representations from within Coq and applying them to various password probability distributions.
