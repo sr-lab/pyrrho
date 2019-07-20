@@ -67,7 +67,7 @@ file = sys.argv[-1]
 
 # Check the target file exists.
 if not os.path.isfile(file):
-    print("Input file '" + file + "' not found.", file=sys.stderr)
+    print('Input file \'' + file + '\' not found.', file=sys.stderr)
     sys.exit(1)
 
 # Try to read in policy from arguments.
