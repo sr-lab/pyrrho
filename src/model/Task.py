@@ -1,7 +1,5 @@
 import json
 
-from .Policy import Policy
-
 
 class Task:
     """ Represents a data processing task.
