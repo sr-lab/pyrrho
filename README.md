@@ -7,7 +7,7 @@ Automated password composition policy selection.
 Pyrrho, named after the first Greek skeptic philosopher [Pyrrho of Elis](https://en.wikipedia.org/wiki/Pyrrho) makes up the core of the Skeptic password composition policy evaluation framework. Written in Python, it does a few things:
 
 * Filters password probability distributions derived from large password datasets according to user-specified password composition policies (rules around password creation). Policy naming in this project mostly follows the Shay/Komanduri conventions \[1\].
-* Redistributes probability in these distributions in a number of different redistribution modes, with the aim of capturing a variety of broad user password selection behaviours.
+* Redistributes probability in these distributions in a number of different redistribution modes, with the aim of capturing a variety of broad user password selectiono behaviours.
 * Fits power-law equations to the resulting distributions to permit selection of password composition policies based on the level of uniformity they induce under different redistribution modes. This draws on research by Malone and Maher \[2\] and Wang et al. \[3\] into [Zipf's law](https://en.wikipedia.org/wiki/Zipf%27s_law) in passwords.
 
 The end result is automated password composition policy ranking.
@@ -33,7 +33,7 @@ password, probability
 
 If we add all the probabilities together, the result is 1. This is a property of probability distributions, specifically one of the probability axioms (number 2) which are as follows:
 
-1. All values in a password probability distribution will be greater than or equal to 0 and less than or equal to 1.
+1. All values in a password probability distribution will bese greater than or equal to 0 and less than or equal to 1.
 2. The sum of all values in the range of password probability distribution will be equal to 1.
 3. The sum of any two distinct values in the domain of a password probability distribution will be equal to the probability of either of those events occurring.
 
@@ -49,10 +49,10 @@ password, probability
 "matrix", 0.214285715
 ```
 
-As it is now impossible for our users to select `hunter2` as a password because it is forbidden by the policy, its probability is now `0`.
+As it is now impossibe for our users to select `hunter2` as a password because it is forbidden by the policy, its probability is now `0`.
 
 ### Proportional Reselection (Average Case)
-Most likely, when users are forced to select a password other than `hunter2`, they will do so proportionally to the remaining probabilities in the distribution. To model this, we can apply simple renormalisation where for each password `p` its probability `P(p)` becomes `P(p) / 1 - P('hunter2')`. This constructs a distribution that preserves the proportions of remaining passwords:
+Most likely, when users are forced to select a password other than `hunter2`, they will do so proportionally to the remaining probabilities in the distribution. To model this, we can apply simple renormalization where for each password `p` its probability `P(p)` becomes `P(p) / 1 - P('hunter2')`. This constructs a distribution that preserves the proportions of remaining passwords:
 
 ```
 password, probability
@@ -99,7 +99,10 @@ python3 pyrrho.py ../tasks/sample.json
 
 You'll notice probability distributions under each redistribution mode and corresponding JSON files containing fitted power-law curves in the `/results` directory when the tool has finished running.
 
+## Acknowledgements
+* The font used in the logo is [Monofur](https://www.dafont.com/monofur.font) by Tobias Benjamin Köhler.
+
 ## References
-1. Saranga Komanduri, Richard Shay, Patrick Gage Kelley, Michelle L. Mazurek, Lujo Bauer, Nicolas Christin, Lorrie Faith Cranor, and Serge Egelman. 2011. Of passwords and people: measuring the effect of password-composition policies. In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI '11). ACM, New York, NY, USA, 2595-2604. DOI: https://doi.org/10.1145/1978942.1979321 \[[PDF](https://www.guanotronic.com/~serge/papers/chi11b.pdf)\]
-2. David Malone and Kevin Maher. 2012. Investigating the distribution of password choices. In Proceedings of the 21st international conference on World Wide Web (WWW '12). ACM, New York, NY, USA, 301-310. DOI: https://doi.org/10.1145/2187836.2187878 \[[PDF](https://www.maths.tcd.ie/~dwmalone/p/www2012.pdf)\]
-3. D. Wang, H. Cheng, P. Wang, X. Huang and G. Jian, "Zipf’s Law in Passwords," in IEEE Transactions on Information Forensics and Security, vol. 12, no. 11, pp. 2776-2791, Nov. 2017. DOI: https://doi.org/10.1109/TIFS.2017.2721359 \[[PDF](http://wangdingg.weebly.com/uploads/2/0/3/6/20366987/passwordzipf_v8.pdf)\]
+1. Saranga Komanduri, Richard Shay, Patrick Gage Kelley, Michelle L. Mazurek, Lujo Bauer, Nicolas Christin, Lorrie Faith Cranor, and Serge Egelman. 2011. Of passwords and people: measuring the effect of password-composition policies. In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI '11). ACM, New York, NY, USA, 2595-2604. DOI: https://doi.org/10.1145/1978942.1979321
+2. David Malone and Kevin Maher. 2012. Investigating the distribution of password choices. In Proceedings of the 21st international conference on World Wide Web (WWW '12). ACM, New York, NY, USA, 301-310. DOI: https://doi.org/10.1145/2187836.2187878
+3. Ding Wang, Haibo Cheng, Ping Wang, Xinyi Huang, and Gaopeng Jian. 2017. Zipf’s Law in Passwords. IEEE Transactions on Information Forensics and Security. 12. 2776-2791. DOI: https://doi.org/10.1109/TIFS.2017.2721359
