@@ -49,8 +49,17 @@ for file in task.files:
                 '-m', str(mode),
                 '-o', out_path,
                 file])
-            # Run optimal attack projection, sampling at percentiles.
-            print('Running optimal attack projection (percentile sampling)...')
-            subprocess.check_output(['python3', 'optimalguess.py', '-c',
-                '-o', compute_out_path(task.out, file, policy, mode, 'log'),
-                out_path])
+            # If redistributed probability file was produced.
+            if os.path.isfile(out_path):
+                # Run optimal attack projection, sampling at percentiles.
+                print('Running optimal attack projection (percentile sampling)...')
+                subprocess.check_output(['python3', 'optimalguess.py', '-c',
+                    '-o', compute_out_path(task.out, file, policy, mode, 'log'),
+                    out_path])
+                # Fit equation to altered distribution.
+                print('Fitting equation to altered probability distribution...')
+                subprocess.check_output(['python3', 'zipf.py',
+                    '-s', '-eq', compute_out_path(task.out, file, policy, mode, 'json'),
+                    out_path])
+            else:
+                print('Redistribution was not possible for', file, 'under', policy, 'possibly because everything was filtered.')
