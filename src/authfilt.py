@@ -151,6 +151,11 @@ filtered_prob = df['probability'].sum()
 surplus = total_prob - filtered_prob
 row_count = len(df.index)
 
+# Detect incoming division by 0 and abort.
+if filtered_prob == 0:
+    print('All passwords were filtered, nowhere to redistribute probability.')
+    exit(0)
+
 # Soft filtration, flag noncompliant passwords as unguessable.
 if redist_mode == 1:
     df['probability'] /= filtered_prob
