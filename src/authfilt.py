@@ -183,10 +183,12 @@ elif redist_mode == 2:
 elif redist_mode == 3:
     df.loc[0, 'probability'] += surplus
 elif redist_mode == 4:
+    # Generate random passwords selected from outside the set.
     single = df['probability'].min()
-    n = floor(surplus / single)
-    df = df.append(pd.DataFrame({"password":[gen_rand_pass(16) for i in range(0, n)],
-                         "probability":[single for i in range(0, n)]}))
+    extra_recs = floor(surplus / single)
+    pwds = [gen_rand_pass(16) for i in range(0, extra_recs)]
+    probabilities = [single for i in range(0, extra_recs)]
+    df = df.append(pd.DataFrame({"password": pwds, "probability": probabilities}))
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)
