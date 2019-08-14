@@ -129,5 +129,8 @@ dmypy.json
 # Results
 /results/*
 
+# Skeptic
+*.native
+
 # Kept directories
 !/**/.gitkeep
