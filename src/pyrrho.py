@@ -7,12 +7,33 @@ from model.Task import Task
 
 # Mode lookup structure.
 MODE_LOOKUP = {
-    0: 'elim',
-    1: 'renorm',
-    2: 'uni',
-    3: 'heavy',
-    4: 'extra'
+    0: 'none',
+    1: 'proportional',
+    2: 'uniform',
+    3: 'convergent',
+    4: 'extraneous'
 }
+
+
+def print_usage (show_help_line=False):
+    """ Prints the short help card for the program.
+    Args:
+        show_help_line (bool): If true, information on help flag `-h` will be printed.
+    """
+    print('Usage: python [-h] pyrrho.py <taskfile>')
+    print('Interprets a task file containing instructions for password probability distribuution transformation.')
+    if show_help_line:
+        print('For extended help use \'-h\' option.')
+
+
+def print_help ():
+    """ Prints the full help card for the program.
+    """
+    print_usage()
+    print('Arguments:')
+    print('\taskfile: The task file to run (see README.md)')
+    print('Options:')
+    print('\t-h: Show this help screen')
 
 
 def compute_out_path (dir, file, policy, mode, ext='csv'):
@@ -29,6 +50,16 @@ def compute_out_path (dir, file, policy, mode, ext='csv'):
     file_name += f'_{policy}_{MODE_LOOKUP[mode]}.{ext}'
     return os.path.join(dir, file_name)
 
+
+# If no options specified, print usage and exit.
+if len(sys.argv) == 1:
+    print_usage(True)
+    exit(0)
+
+# If help flag specified, print help and exit.
+if is_arg_passed('h'):
+    print_help()
+    exit(0)
 
 # Load task from file.
 task = Task.load(sys.argv[1])

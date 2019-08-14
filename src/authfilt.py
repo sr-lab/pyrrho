@@ -141,8 +141,8 @@ if not try_launch_auth(authority, policy):
     print('Could not launch authority \'' + authority + '\', check policy name and executable flag.', file=sys.stderr)
     sys.exit(1)
 
-# Get redistribution mode.
-redist_mode = 0 if not is_arg_passed('m') else get_int_valued_arg('m')
+# Get reselection mode.
+resel_mode = 0 if not is_arg_passed('m') else get_int_valued_arg('m')
 
 # Get output path if one was specified.
 out = get_valued_arg('o')
@@ -174,16 +174,19 @@ if filtered_prob == 0:
     print('All passwords were filtered, nowhere to redistribute probability.')
     exit(0)
 
-# Soft filtration, flag noncompliant passwords as unguessable.
-if redist_mode == 1:
+# Different reselection modes.
+if resel_mode == 1:
+    # Proportional reselection.
     df['probability'] /= filtered_prob
-elif redist_mode == 2:
+elif resel_mode == 2:
+    # Uniform reselection.
     ech = surplus / row_count
     df['probability'] += ech
-elif redist_mode == 3:
+elif resel_mode == 3:
+    # Convergent reselection.
     df.loc[0, 'probability'] += surplus
-elif redist_mode == 4:
-    # Generate random passwords selected from outside the set.
+elif resel_mode == 4:
+    # Extraneous reselection.
     single = df['probability'].min()
     extra_recs = floor(surplus / single)
     pwds = [gen_rand_pass(16) for i in range(0, extra_recs)]
