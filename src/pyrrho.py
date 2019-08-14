@@ -10,7 +10,8 @@ MODE_LOOKUP = {
     0: 'elim',
     1: 'renorm',
     2: 'uni',
-    3: 'heavy'
+    3: 'heavy',
+    4: 'extra'
 }
 
 
