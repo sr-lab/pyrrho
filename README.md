@@ -92,7 +92,7 @@ password, probability
 "K*wT4boTt""SJd64t", 0.027777778
 ```
 
-For this to work properly, at least one remaining password has to have a probability corresponding to frequency 1. Otherwise Pyrrho can't work out the probability to assign to extraneous passwords, and therefore how many of them it needs to add.
+**Note:** For this to work properly, at least one remaining password has to have a probability corresponding to frequency 1. Otherwise Pyrrho can't work out the probability to assign to extraneous passwords, and therefore how many of them it needs to add. Generated passwords aren't guaranteed to be unique, or compliant with the policy (this shouldn't really matter).
 
 ## Running
 To run the demo, first take a look at the file in `/tasks/sample.json`:
