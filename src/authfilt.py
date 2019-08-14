@@ -1,7 +1,10 @@
 import sys
 import os
 import time
+import string
+import random
 from subprocess import *
+from math import floor
 
 import numpy as np
 import pandas as pd
@@ -35,10 +38,11 @@ def print_help ():
     print('\t-o <str>: The file in which to place output')
     print('Notes:')
     print('\t[1]: Redistribution modes include:')
-    print('\t\t0: Elimination mode, eliminate outcomes only (breaks the distribution!)')
-    print('\t\t1: Renormalization mode, proportionally redistributes probability of eliminated outcomes')
-    print('\t\t2: Uniform mode, uniformly redistributes probability of eliminated outcomes')
-    print('\t\t3: Heavy-tail mode, places probability from all eliminated outcomes into most frequent outcome')
+    print('\t\t0: No reselection mode, eliminate outcomes only (breaks the distribution!)')
+    print('\t\t1: Proportional reselection mode, proportionally redistributes probability of eliminated outcomes')
+    print('\t\t2: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
+    print('\t\t3: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
+    print('\t\t4: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
     print()
     print('Input file should be in CSV format:')
     print('\tpassword, probability, ... <- Column headers')
@@ -52,6 +56,20 @@ GL_BATCH_SIZE = 5000
 
 # The authority process (global).
 gl_auth_proc = None
+
+
+def gen_rand_pass (len):
+    """ Generates a random password.
+
+    Note that this password is not subject to a password composition policy.
+
+    Args:
+        len (int): The length of the password to generate.
+    Returns:
+        str: The generated password
+    """
+    alpha = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(alpha) for i in range(len))
 
 
 def try_launch_auth (file, policy):
@@ -164,6 +182,11 @@ elif redist_mode == 2:
     df['probability'] += ech
 elif redist_mode == 3:
     df.loc[0, 'probability'] += surplus
+elif redist_mode == 4:
+    single = df['probability'].min()
+    n = floor(surplus / single)
+    df = df.append(pd.DataFrame({"password":[gen_rand_pass(16) for i in range(0, n)],
+                         "probability":[single for i in range(0, n)]}))
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)
