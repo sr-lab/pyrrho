@@ -6,7 +6,7 @@ Automated password composition policy selection.
 ## Overview
 Pyrrho, named after the first Greek skeptic philosopher [Pyrrho of Elis](https://en.wikipedia.org/wiki/Pyrrho) makes up the core of the Skeptic password composition policy evaluation framework. Written in Python, it does a few things:
 
-* Filters password probability distributions derived from large password datasets according to user-specified password composition policies (rules around password creation). Policy naming in this project mostly follows the Shay/Komanduri conventions \[1\].
+* Filters password probability distributions derived from large password datasets according to user-specified password composition policies (rules around password creation). This filtration is powered by an external [Skeptic Authority](https://github.com/sr-lab/skeptic-authority-template). Policy naming in this project mostly follows the Shay/Komanduri conventions \[1\].
 * Redistributes probability in these distributions in a number of different redistribution modes, with the aim of capturing a variety of broad user password selectiono behaviours.
 * Fits power-law equations to the resulting distributions to permit selection of password composition policies based on the level of uniformity they induce under different redistribution modes. This draws on research by Malone and Maher \[2\] and Wang et al. \[3\] into [Zipf's law](https://en.wikipedia.org/wiki/Zipf%27s_law) in passwords.
 
@@ -20,15 +20,17 @@ password, frequency
 "password", 25
 "hunter2", 5
 "matrix", 5
+"secure", 1
 ```
 
 So their probability distribution looks like this:
 
 ```
 password, probability
-"password", 0.714285714
-"hunter2", 0.142857143
-"matrix", 0.142857143
+"password", 0.694444444
+"hunter2", 0.138888889
+"matrix", 0.138888889
+"secure", 0.027777778
 ```
 
 If we add all the probabilities together, the result is 1. This is a property of probability distributions, specifically one of the probability axioms (number 2) which are as follows:
@@ -39,14 +41,15 @@ If we add all the probabilities together, the result is 1. This is a property of
 
 Now, let's say we implement a password composition policy banning the password `hunter2` on the system. How does the above probability distribution change? The answer is that a depends on user behaviour (specifically, how users re-select their passwords), so we *don't know*. What we can do, though, is work out a best case, an average case and a worst case in a way that doesn't break our probability distribution by causing it to violate any of the probability axioms.
 
-### Uniform Reselection (Best Case)
-All users select another password completely uniformly. This means that the probability `0.142857143` that used to belong to the password `hunter2` will be divided equally between the remaining passwords. As we have two remaining passwords, that will mean adding `0.142857143 / 2 = 0.071428572` to each remaining probability, resulting in:
+### Uniform Reselection
+All users select another password completely uniformly. This means that the probability `0.138888889` that used to belong to the password `hunter2` will be divided equally between the remaining passwords. As we have two remaining passwords, that will mean adding `0.138888889 / 3 = 0.046296296` to each remaining probability, resulting in:
 
 ```
 password, probability
-"password", 0.785714286
+"password", 0.74074074
 "hunter2", 0
-"matrix", 0.214285715
+"matrix", 0.185185185
+"secure", 0.074074074
 ```
 
 As it is now impossibe for our users to select `hunter2` as a password because it is forbidden by the policy, its probability is now `0`.
@@ -56,9 +59,10 @@ Most likely, when users are forced to select a password other than `hunter2`, th
 
 ```
 password, probability
-"password", 0.833333333
+"password", 0.806451612
 "hunter2", 0
-"matrix", 0.166666667
+"matrix", 0.161290323
+"secure", 0.032258065
 ```
 
 ### Convergent Reselection (Worst Case)
@@ -66,10 +70,29 @@ If we assume the worst, for every password we ban, all users who would previousl
 
 ```
 password, probability
-"password", 0.857142857
+"password", 0.833333333
 "hunter2", 0
-"matrix", 0.142857143
+"matrix", 0.138888889
+"secure", 0.027777778
 ```
+
+### Extraneous Reselection (Best Case)
+All users select another unique password outside the set. This means that the probability `0.142857143` that used to belong to the password `hunter2` will now belong to a new randomly-generated password. This results in something like the following:
+
+```
+password, probability
+"password", 0.694444444
+"hunter2", 0
+"matrix", 0.138888889
+"secure", 0.027777778
+":#(3CZ5f&eY\""M&}", 0.027777778
+"agTuJcmp*@DR28.p", 0.027777778
+"D*JZ)%>BC0qY,-&`", 0.027777778
+"h)s2_~W=^9s07;~j", 0.027777778
+"K*wT4boTt""SJd64t", 0.027777778
+```
+
+For this to work properly, at least one remaining password has to have a probability corresponding to frequency 1. Otherwise Pyrrho can't work out the probability to assign to extraneous passwords, and therefore how many of them it needs to add.
 
 ## Running
 To run the demo, first take a look at the file in `/tasks/sample.json`:
@@ -77,18 +100,19 @@ To run the demo, first take a look at the file in `/tasks/sample.json`:
 ```json
 {
   "out": "../results",
-  "modes": [1, 2, 3],
+  "modes": [1, 2, 3, 4],
   "files": ["../data/singles.probs"],
   "authority": "./authority.native",
   "policies": ["basic8", "basic7", "basic6"]
 }
 ```
 
-This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\]. Actual password composition policy enforcement is carried out by a [Skeptic authority](https://github.com/sr-lab/skeptic-authority-template), which must be compiled and referenced from the `authority` field. All specified policies must be understood by the authority, for more instructions consult [the Skeptic authority template repository](https://github.com/sr-lab/skeptic-authority-template). Modes are as follows:
+This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\]. Actual password composition policy enforcement is carried out by a [Skeptic Authority](https://github.com/sr-lab/skeptic-authority-template), which must be compiled and referenced from the `authority` field. All specified policies must be understood by the authority, for more instructions consult [the Skeptic authority template repository](https://github.com/sr-lab/skeptic-authority-template). Modes are as follows:
 
 1. Proportional Reselection
 2. Uniform Reselection
 3. Convergent Reselection
+4. Extraneous Reselection
 
 For testing purposes, a probability distribution derived from passwords in the relatively small *singles.org* dataset from [SecLists](https://github.com/danielmiessler/seclists) is included under `/data`. To see the tool in action, run the following and take a look in the `/results` directory:
 
