@@ -1,7 +1,7 @@
 {
   "out": "../results",
-  "modes": [1, 2, 3],
+  "modes": [1, 2, 3, 4],
   "files": ["../data/singles.probs"],
-  "authority": "./authority.native",
-  "policies": ["basic8", "basic7", "basic6"]
+  "authority": "../authorities/sample.authority",
+  "policies": ["basic6", "basic7", "basic8"]
 }
