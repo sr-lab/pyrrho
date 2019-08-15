@@ -107,14 +107,14 @@ To run the demo, first take a look at the file in `/tasks/sample.json`:
 }
 ```
 
-This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\]. Actual password composition policy enforcement is carried out by a [Skeptic Authority](https://github.com/sr-lab/skeptic-authority-template), which must be compiled and referenced from the `authority` field. All specified policies must be understood by the authority, for more instructions consult [the Skeptic authority template repository](https://github.com/sr-lab/skeptic-authority-template). Modes are as follows:
+This is a very simple file format, understood by Pyrrho, called a *task*. For every file listed in `files` (see `/data/singles.probs` to get an idea about formatting), redistribution will take places in each mode listed in `modes` under each policy listed in `policies` \[1\]. Actual password composition policy enforcement is carried out by a [Skeptic Authority](https://github.com/sr-lab/skeptic-authority-template), which must be compiled and referenced from the `authority` field. For demonstration purposes, a compiled sample authority that understands `basic6`, `basic7` and `basic8` policies is included under `/authorities/sample.authority`. All specified policies must be understood by the authority, for more instructions consult [the Skeptic authority template repository](https://github.com/sr-lab/skeptic-authority-template). Modes are as follows:
 
 1. Proportional Reselection
 2. Uniform Reselection
 3. Convergent Reselection
 4. Extraneous Reselection
 
-For testing purposes, a probability distribution derived from passwords in the relatively small *singles.org* dataset from [SecLists](https://github.com/danielmiessler/seclists) is included under `/data`. To see the tool in action, run the following and take a look in the `/results` directory:
+For testing purposes, a probability distribution derived from passwords in the relatively small *singles.org* dataset from [SecLists](https://github.com/danielmiessler/seclists) is included under `/data`. To see the tool in action, run the following and take a look in the `/results` directory (*must* be run from the `/src` directory):
 
 ```bash
 cd src
