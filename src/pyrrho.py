@@ -32,7 +32,7 @@ def print_help ():
     """
     print_usage()
     print('Arguments:')
-    print('\taskfile: The task file to run (see README.md)')
+    print('\ttaskfile: The task file to run (see README.md)')
     print('Options:')
     print('\t-h: Show this help screen')
 
