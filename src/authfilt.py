@@ -3,6 +3,7 @@ import os
 import time
 import string
 import random
+import importlib
 from subprocess import *
 from math import floor
 
@@ -51,6 +52,10 @@ def print_help ():
     print('\tmatrix, 0.14325, ...')
 
 
+# Modes plugin directory needs to go in our path.
+sys.path.insert(0, './modes/')
+
+
 # The total number of passwords the authority will ask for. Setting this too high will cause a stack overflow!
 GL_BATCH_SIZE = 20000
 
@@ -75,6 +80,18 @@ def gen_rand_pass (len):
     return ''.join(random.choice(alpha) for i in range(len))
 
 
+def load_resel_mode (name):
+    """ Loads a reselection mode plugin by name.
+
+    Args:
+        name (str): The name of the mode to load (must correspond to module unde `./modes`).
+    Returns:
+        module: The loaded mode as a module.
+    """
+    mode = importlib.import_module(name)
+    return mode
+
+
 def try_launch_auth (file, policy):
     """ Attempts to launch the global authority.
 
@@ -94,6 +111,7 @@ def try_launch_auth (file, policy):
         except:
             pass
         retries += 1 # TODO: Handle failure.
+    return success
 
 
 def ask_auth (pwd):
@@ -149,7 +167,7 @@ if not try_launch_auth(authority, policy):
     sys.exit(1)
 
 # Get reselection mode.
-resel_mode = 0 if not is_arg_passed('m') else get_int_valued_arg('m')
+resel_mode = get_valued_arg('m')
 
 # Get output path if one was specified.
 out = get_valued_arg('o')
@@ -182,23 +200,9 @@ if filtered_prob == 0:
     exit(0)
 
 # Different reselection modes.
-if resel_mode == 1:
-    # Proportional reselection.
-    df['probability'] /= filtered_prob
-elif resel_mode == 2:
-    # Uniform reselection.
-    ech = surplus / row_count
-    df['probability'] += ech
-elif resel_mode == 3:
-    # Convergent reselection.
-    df.loc[0, 'probability'] += surplus
-elif resel_mode == 4:
-    # Extraneous reselection.
-    single = df['probability'].min()
-    extra_recs = floor(surplus / single)
-    pwds = [gen_rand_pass(16) for i in range(0, extra_recs)]
-    probabilities = [single for i in range(0, extra_recs)]
-    df = df.append(pd.DataFrame({"password": pwds, "probability": probabilities}))
+if resel_mode != None:
+    reselector = load_resel_mode(resel_mode)
+    reselector.reselect(total_prob, surplus, df)
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)
