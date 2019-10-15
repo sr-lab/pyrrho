@@ -52,7 +52,10 @@ def print_help ():
 
 
 # The total number of passwords the authority will ask for. Setting this too high will cause a stack overflow!
-GL_BATCH_SIZE = 5000
+GL_BATCH_SIZE = 20000
+
+# The total number of times to attempt to launch the authority.
+AUTH_LAUNCH_RETRIES = 20
 
 # The authority process (global).
 gl_auth_proc = None
@@ -81,12 +84,16 @@ def try_launch_auth (file, policy):
     """
     global gl_auth_proc # We need to assign to this global.
     gl_auth_proc = (None, file, policy)
-    try:
-        gl_auth_proc = (Popen([file, policy, str(GL_BATCH_SIZE)], stdin=PIPE, stdout=PIPE), file, policy)
-        time.sleep(2) # Wait, it might exit immediately if parameters are incorrect.
-        return gl_auth_proc[0].poll() == None
-    except:
-        return False
+    success = False
+    retries = 0
+    while not success and retries <= AUTH_LAUNCH_RETRIES: # We might need to retry this several times.
+        try:
+            gl_auth_proc = (Popen([file, policy, str(GL_BATCH_SIZE)], stdin=PIPE, stdout=PIPE), file, policy)
+            time.sleep(2 * (retries + 1)) # Wait, it might exit immediately if parameters are incorrect.
+            success = gl_auth_proc[0].poll() == None
+        except:
+            pass
+        retries += 1 # TODO: Handle failure.
 
 
 def ask_auth (pwd):
@@ -100,7 +107,7 @@ def ask_auth (pwd):
     # Relaunch process if necessary.
     poll = gl_auth_proc[0].poll()
     if poll != None:
-        try_launch_auth(gl_auth_proc[1], gl_auth_proc[2])
+        try_launch_auth(gl_auth_proc[1], gl_auth_proc[2]) # TODO: Handle failure.
     # Pass password into authority (don't forget to flush).
     gl_auth_proc[0].stdin.write(f'{pwd}\n'.encode())
     gl_auth_proc[0].stdin.flush()
