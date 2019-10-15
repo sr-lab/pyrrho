@@ -77,7 +77,7 @@ for file in task.files:
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy, mode)
             success = False
-            while not succcess: # This might need retrying several times.
+            while not success: # This might need retrying several times.
                 try:
                     subprocess.check_output(['python3', 'authfilt.py',
                         '-a', task.authority,
