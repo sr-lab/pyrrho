@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import subprocess
 
 from shared.args import is_arg_passed
@@ -25,6 +26,10 @@ def print_help ():
     print('\ttaskfile: The task file to run (see README.md)')
     print('Options:')
     print('\t-h: Show this help screen')
+
+
+# The total number of times to attempt to run the filtration script.
+FILT_RUN_RETRIES = 5
 
 
 def compute_out_path (dir, file, policy, mode, ext='csv'):
@@ -66,8 +71,9 @@ for file in task.files:
             print('In mode', mode, f'({mode}) reselecting...')
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy, mode)
+            retries = 0
             success = False
-            while not success: # This might need retrying several times.
+            while not success and retries <= FILT_RUN_RETRIES: # We might need to retry this several times.
                 try:
                     subprocess.check_output(['python3', 'authfilt.py',
                         '-a', task.authority,
@@ -77,7 +83,9 @@ for file in task.files:
                         file])
                     success = True
                 except:
-                    print('Authority filtration process died. Retrying...')
+                    print(f'Authority filtration process died. Retrying (attempt {retries + 1} of {AUTH_LAUNCH_RETRIES})...')
+                    time.sleep(2 * (retries + 1)) # Wait, GC might need to run or something.
+                retries += 1
             # If redistributed probability file was produced.
             if os.path.isfile(out_path):
                 # Run optimal attack projection, sampling at percentiles.
