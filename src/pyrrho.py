@@ -76,12 +76,18 @@ for file in task.files:
             print('In mode', mode, f'({MODE_LOOKUP[mode]}) redistributing...')
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy, mode)
-            subprocess.check_output(['python3', 'authfilt.py',
-                '-a', task.authority,
-                '-p', policy,
-                '-m', str(mode),
-                '-o', out_path,
-                file])
+            success = False
+            while not succcess: # This might need retrying several times.
+                try:
+                    subprocess.check_output(['python3', 'authfilt.py',
+                        '-a', task.authority,
+                        '-p', policy,
+                        '-m', str(mode),
+                        '-o', out_path,
+                        file])
+                    success = True
+                except:
+                    print('Authority filtration process died. Retrying...')
             # If redistributed probability file was produced.
             if os.path.isfile(out_path):
                 # Run optimal attack projection, sampling at percentiles.
