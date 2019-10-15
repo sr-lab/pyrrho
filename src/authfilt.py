@@ -19,7 +19,7 @@ def print_usage (show_help_line=False):
         show_help_line (bool): If true, information on help flag `-h` will be printed.
     """
     print('Usage: python authfilt.py [-hi] [-a <authority>] [-p <policy>] [-m <renorm_mode>] [-o <outfile>] <infile>')
-    print('Filters a CSV file of password probabilities according to an authority and redistributes filtered probabilities.')
+    print('Filters a CSV file of password probabilities according to an authority and redistributes filtered probabilities according to a reselection mode.')
     if show_help_line:
         print('For extended help use \'-h\' option.')
 
@@ -38,12 +38,12 @@ def print_help ():
     print('\t-i: Invert policy (filter all accepted, output only rejected)')
     print('\t-o <str>: The file in which to place output')
     print('Notes:')
-    print('\t[1]: Redistribution modes include:')
-    print('\t\t0: No reselection mode, eliminate outcomes only (breaks the distribution!)')
-    print('\t\t1: Proportional reselection mode, proportionally redistributes probability of eliminated outcomes')
-    print('\t\t2: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
-    print('\t\t3: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
-    print('\t\t4: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
+    print('\t[1]: Bundled redistribution modes include:')
+    print('\t\tnone: No reselection mode, eliminate outcomes only (breaks the distribution!)')
+    print('\t\tproportional: Proportional reselection mode, proportionally redistributes probability of eliminated outcomes')
+    print('\t\tuniform: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
+    print('\t\tconvergent: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
+    print('\t\textraneous: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
     print()
     print('Input file should be in CSV format:')
     print('\tpassword, probability, ... <- Column headers')

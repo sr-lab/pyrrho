@@ -34,7 +34,7 @@ def compute_out_path (dir, file, policy, mode, ext='csv'):
         dir (str): The base output directory path.
         file (str): The name of the original file.
         policy (str): The name of the policy used to filter the data.
-        mode (str): The redistribution mode used.
+        mode (str): The reselection mode used.
         ext (str): The file extension to use.
     """
     file_name = os.path.splitext(os.path.basename(file))[0]
@@ -60,10 +60,10 @@ for file in task.files:
     print('Now working on file:', file)
     # For each policy the task specifies.
     for policy in task.policies:
-        print('Redistributing for policy:', policy)
+        print('Reselecting for policy:', policy)
         # For each mode the task specifies.
         for mode in task.modes:
-            print('In mode', mode, f'({mode}) redistributing...')
+            print('In mode', mode, f'({mode}) reselecting...')
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy, mode)
             success = False
@@ -91,4 +91,4 @@ for file in task.files:
                     '-s', '-eq', compute_out_path(task.out, file, policy, mode, 'json'),
                     out_path])
             else:
-                print('Redistribution was not possible for', file, 'under', policy, 'possibly because everything was filtered.')
+                print('Redistribution of probability was not possible for', file, 'under', policy, 'possibly because everything was filtered.')
