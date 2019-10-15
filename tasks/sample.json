@@ -1,6 +1,6 @@
 {
   "out": "../results",
-  "modes": [1, 2, 3, 4],
+  "modes": ["proportional", "uniform", "convergent", "extraneous"],
   "files": ["../data/singles.probs"],
   "authority": "../authorities/sample.authority",
   "policies": ["basic6", "basic7", "basic8"]

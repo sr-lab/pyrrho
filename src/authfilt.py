@@ -3,6 +3,7 @@ import os
 import time
 import string
 import random
+import importlib
 from subprocess import *
 from math import floor
 
@@ -18,7 +19,7 @@ def print_usage (show_help_line=False):
         show_help_line (bool): If true, information on help flag `-h` will be printed.
     """
     print('Usage: python authfilt.py [-hi] [-a <authority>] [-p <policy>] [-m <renorm_mode>] [-o <outfile>] <infile>')
-    print('Filters a CSV file of password probabilities according to an authority and redistributes filtered probabilities.')
+    print('Filters a CSV file of password probabilities according to an authority and redistributes filtered probabilities according to a reselection mode.')
     if show_help_line:
         print('For extended help use \'-h\' option.')
 
@@ -37,12 +38,13 @@ def print_help ():
     print('\t-i: Invert policy (filter all accepted, output only rejected)')
     print('\t-o <str>: The file in which to place output')
     print('Notes:')
-    print('\t[1]: Redistribution modes include:')
-    print('\t\t0: No reselection mode, eliminate outcomes only (breaks the distribution!)')
-    print('\t\t1: Proportional reselection mode, proportionally redistributes probability of eliminated outcomes')
-    print('\t\t2: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
-    print('\t\t3: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
-    print('\t\t4: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
+    print('\t[1]: Bundled redistribution modes include:')
+    print('\t\tnone: No reselection mode, eliminate outcomes only (breaks the distribution!)')
+    print('\t\tproportional: Proportional reselection mode, proportionally redistributes probability of eliminated outcomes')
+    print('\t\tuniform: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
+    print('\t\tconvergent: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
+    print('\t\textraneous: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
+    print('\t\custom: You may add your own reselection modes as Python files in the `./modes` folder')
     print()
     print('Input file should be in CSV format:')
     print('\tpassword, probability, ... <- Column headers')
@@ -51,11 +53,15 @@ def print_help ():
     print('\tmatrix, 0.14325, ...')
 
 
+# Modes plugin directory needs to go in our path.
+sys.path.insert(0, './modes/')
+
+
 # The total number of passwords the authority will ask for. Setting this too high will cause a stack overflow!
 GL_BATCH_SIZE = 20000
 
 # The total number of times to attempt to launch the authority.
-AUTH_LAUNCH_RETRIES = 20
+AUTH_LAUNCH_RETRIES = 5
 
 # The authority process (global).
 gl_auth_proc = None
@@ -75,6 +81,18 @@ def gen_rand_pass (len):
     return ''.join(random.choice(alpha) for i in range(len))
 
 
+def load_resel_mode (name):
+    """ Loads a reselection mode plugin by name.
+
+    Args:
+        name (str): The name of the mode to load (must correspond to module unde `./modes`).
+    Returns:
+        module: The loaded mode as a module.
+    """
+    mode = importlib.import_module(name)
+    return mode
+
+
 def try_launch_auth (file, policy):
     """ Attempts to launch the global authority.
 
@@ -92,8 +110,9 @@ def try_launch_auth (file, policy):
             time.sleep(2 * (retries + 1)) # Wait, it might exit immediately if parameters are incorrect.
             success = gl_auth_proc[0].poll() == None
         except:
-            pass
-        retries += 1 # TODO: Handle failure.
+            print(f'Authority launch failed, retrying (attempt {retries + 1} of {AUTH_LAUNCH_RETRIES})...', file=sys.stderr)
+        retries += 1
+    return success
 
 
 def ask_auth (pwd):
@@ -106,8 +125,9 @@ def ask_auth (pwd):
     """
     # Relaunch process if necessary.
     poll = gl_auth_proc[0].poll()
-    if poll != None:
-        try_launch_auth(gl_auth_proc[1], gl_auth_proc[2]) # TODO: Handle failure.
+    if poll != None and not try_launch_auth(gl_auth_proc[1], gl_auth_proc[2]):
+        print('Authority launch failed completely, aborting...', file=sys.stderr)
+        exit(1)
     # Pass password into authority (don't forget to flush).
     gl_auth_proc[0].stdin.write(f'{pwd}\n'.encode())
     gl_auth_proc[0].stdin.flush()
@@ -149,7 +169,7 @@ if not try_launch_auth(authority, policy):
     sys.exit(1)
 
 # Get reselection mode.
-resel_mode = 0 if not is_arg_passed('m') else get_int_valued_arg('m')
+resel_mode = get_valued_arg('m')
 
 # Get output path if one was specified.
 out = get_valued_arg('o')
@@ -182,23 +202,9 @@ if filtered_prob == 0:
     exit(0)
 
 # Different reselection modes.
-if resel_mode == 1:
-    # Proportional reselection.
-    df['probability'] /= filtered_prob
-elif resel_mode == 2:
-    # Uniform reselection.
-    ech = surplus / row_count
-    df['probability'] += ech
-elif resel_mode == 3:
-    # Convergent reselection.
-    df.loc[0, 'probability'] += surplus
-elif resel_mode == 4:
-    # Extraneous reselection.
-    single = df['probability'].min()
-    extra_recs = floor(surplus / single)
-    pwds = [gen_rand_pass(16) for i in range(0, extra_recs)]
-    probabilities = [single for i in range(0, extra_recs)]
-    df = df.append(pd.DataFrame({"password": pwds, "probability": probabilities}))
+if resel_mode != None:
+    reselector = load_resel_mode(resel_mode)
+    reselector.reselect(total_prob, surplus, df)
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)

@@ -1,19 +1,10 @@
 import sys
 import os
+import time
 import subprocess
 
 from shared.args import is_arg_passed
 from model.Task import Task
-
-
-# Mode lookup structure.
-MODE_LOOKUP = {
-    0: 'none',
-    1: 'proportional',
-    2: 'uniform',
-    3: 'convergent',
-    4: 'extraneous'
-}
 
 
 def print_usage (show_help_line=False):
@@ -37,6 +28,10 @@ def print_help ():
     print('\t-h: Show this help screen')
 
 
+# The total number of times to attempt to run the filtration script.
+FILT_RUN_RETRIES = 5
+
+
 def compute_out_path (dir, file, policy, mode, ext='csv'):
     """ Computes the name of a file to write renormalized data to.
 
@@ -44,11 +39,11 @@ def compute_out_path (dir, file, policy, mode, ext='csv'):
         dir (str): The base output directory path.
         file (str): The name of the original file.
         policy (str): The name of the policy used to filter the data.
-        mode (int): The redistribution mode used (from policyfilt.py).
+        mode (str): The reselection mode used.
         ext (str): The file extension to use.
     """
     file_name = os.path.splitext(os.path.basename(file))[0]
-    file_name += f'_{policy}_{MODE_LOOKUP[mode]}.{ext}'
+    file_name += f'_{policy}_{mode}.{ext}'
     return os.path.join(dir, file_name)
 
 
@@ -70,24 +65,27 @@ for file in task.files:
     print('Now working on file:', file)
     # For each policy the task specifies.
     for policy in task.policies:
-        print('Redistributing for policy:', policy)
+        print('Reselecting for policy:', policy)
         # For each mode the task specifies.
         for mode in task.modes:
-            print('In mode', mode, f'({MODE_LOOKUP[mode]}) redistributing...')
+            print('In mode', mode, f'({mode}) reselecting...')
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy, mode)
+            retries = 0
             success = False
-            while not success: # This might need retrying several times.
+            while not success and retries <= FILT_RUN_RETRIES: # We might need to retry this several times.
                 try:
                     subprocess.check_output(['python3', 'authfilt.py',
                         '-a', task.authority,
                         '-p', policy,
-                        '-m', str(mode),
+                        '-m', mode,
                         '-o', out_path,
                         file])
                     success = True
                 except:
-                    print('Authority filtration process died. Retrying...')
+                    print(f'Authority filtration process died. Retrying (attempt {retries + 1} of {AUTH_LAUNCH_RETRIES})...')
+                    time.sleep(2 * (retries + 1)) # Wait, GC might need to run or something.
+                retries += 1
             # If redistributed probability file was produced.
             if os.path.isfile(out_path):
                 # Run optimal attack projection, sampling at percentiles.
@@ -101,4 +99,4 @@ for file in task.files:
                     '-s', '-eq', compute_out_path(task.out, file, policy, mode, 'json'),
                     out_path])
             else:
-                print('Redistribution was not possible for', file, 'under', policy, 'possibly because everything was filtered.')
+                print('Redistribution of probability was not possible for', file, 'under', policy, 'possibly because everything was filtered.')
