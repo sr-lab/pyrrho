@@ -6,16 +6,6 @@ from shared.args import is_arg_passed
 from model.Task import Task
 
 
-# Mode lookup structure.
-MODE_LOOKUP = {
-    0: 'none',
-    1: 'proportional',
-    2: 'uniform',
-    3: 'convergent',
-    4: 'extraneous'
-}
-
-
 def print_usage (show_help_line=False):
     """ Prints the short help card for the program.
     Args:
@@ -44,11 +34,11 @@ def compute_out_path (dir, file, policy, mode, ext='csv'):
         dir (str): The base output directory path.
         file (str): The name of the original file.
         policy (str): The name of the policy used to filter the data.
-        mode (int): The redistribution mode used (from policyfilt.py).
+        mode (str): The redistribution mode used.
         ext (str): The file extension to use.
     """
     file_name = os.path.splitext(os.path.basename(file))[0]
-    file_name += f'_{policy}_{MODE_LOOKUP[mode]}.{ext}'
+    file_name += f'_{policy}_{mode}.{ext}'
     return os.path.join(dir, file_name)
 
 
@@ -73,7 +63,7 @@ for file in task.files:
         print('Redistributing for policy:', policy)
         # For each mode the task specifies.
         for mode in task.modes:
-            print('In mode', mode, f'({MODE_LOOKUP[mode]}) redistributing...')
+            print('In mode', mode, f'({mode}) redistributing...')
             # Run policy filtration/distribution renormalization script.
             out_path = compute_out_path(task.out, file, policy, mode)
             success = False
@@ -82,7 +72,7 @@ for file in task.files:
                     subprocess.check_output(['python3', 'authfilt.py',
                         '-a', task.authority,
                         '-p', policy,
-                        '-m', str(mode),
+                        '-m', mode,
                         '-o', out_path,
                         file])
                     success = True
