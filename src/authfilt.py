@@ -60,7 +60,7 @@ sys.path.insert(0, './modes/')
 GL_BATCH_SIZE = 20000
 
 # The total number of times to attempt to launch the authority.
-AUTH_LAUNCH_RETRIES = 20
+AUTH_LAUNCH_RETRIES = 5
 
 # The authority process (global).
 gl_auth_proc = None
