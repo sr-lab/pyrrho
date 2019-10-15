@@ -44,6 +44,7 @@ def print_help ():
     print('\t\tuniform: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
     print('\t\tconvergent: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
     print('\t\textraneous: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
+    print('\t\custom: You may add your own reselection modes as Python files in the `./modes` folder')
     print()
     print('Input file should be in CSV format:')
     print('\tpassword, probability, ... <- Column headers')
