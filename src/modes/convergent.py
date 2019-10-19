@@ -11,3 +11,4 @@ def reselect (total, surplus, df):
     """
     # Convergent reselection.
     df.loc[0, 'probability'] += surplus
+    return df

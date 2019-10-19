@@ -204,7 +204,7 @@ if filtered_prob == 0:
 # Different reselection modes.
 if resel_mode != None:
     reselector = load_resel_mode(resel_mode)
-    reselector.reselect(total_prob, surplus, df)
+    df = reselector.reselect(total_prob, surplus, df)
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)

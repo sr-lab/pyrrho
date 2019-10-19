@@ -12,3 +12,4 @@ def reselect (total, surplus, df):
     # Uniform reselection.
     ech = surplus / len(df.index)
     df['probability'] += ech
+    return df

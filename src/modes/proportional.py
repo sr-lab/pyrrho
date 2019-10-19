@@ -11,4 +11,5 @@ def reselect (total, surplus, df):
     """
     # Proportional reselection.
     divisor = total - surplus
-    df['probability'] /= divisor
+    df['probability'] /= divisor#
+    return df

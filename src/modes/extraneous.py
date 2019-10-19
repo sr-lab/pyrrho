@@ -33,3 +33,4 @@ def reselect (total, surplus, df):
     pwds = [gen_rand_pass(16) for i in range(0, extra_recs)]
     probabilities = [single for i in range(0, extra_recs)]
     df = df.append(pd.DataFrame({"password": pwds, "probability": probabilities}))
+    return df
