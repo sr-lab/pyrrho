@@ -83,7 +83,7 @@ for file in task.files:
                         file])
                     success = True
                 except:
-                    print(f'Authority filtration process died. Retrying (attempt {retries + 1} of {AUTH_LAUNCH_RETRIES})...')
+                    print(f'Authority filtration process died. Retrying (attempt {retries + 1} of {FILT_RUN_RETRIES})...')
                     time.sleep(2 * (retries + 1)) # Wait, GC might need to run or something.
                 retries += 1
             # If redistributed probability file was produced.
