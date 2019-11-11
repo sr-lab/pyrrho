@@ -15,7 +15,7 @@ def print_usage (show_help_line=False):
         show_help_line (bool): If true, information on help flag `-h` will be printed.
     """
     print('Usage: python policyfilt.py [-hi] [-nludsacw <min>] [-m <renorm_mode>] [-o <outfile>] <infile>')
-    print('Filters a CSV file of password probabilities according to a policy.')
+    print('Filters a CSV file of password probabilities according to a policy and redistributes filtered probabilities according to a reselection mode.')
     if show_help_line:
         print('For extended help use \'-h\' option.')
 

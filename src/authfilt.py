@@ -157,7 +157,7 @@ if not try_launch_auth(authority, policy):
     sys.exit(1)
 
 # Get reselection mode.
-resel_mode = get_valued_arg('m')
+resel_mode = None if not is_arg_passed('m') else get_valued_arg('m')
 
 # Get output path if one was specified.
 out = get_valued_arg('o')
