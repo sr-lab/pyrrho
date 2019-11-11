@@ -3,7 +3,6 @@ import os
 import time
 import string
 import random
-import importlib
 from subprocess import *
 from math import floor
 
@@ -11,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from shared.args import get_valued_arg, is_arg_passed, get_int_valued_arg
+from shared.moduleloading import load_resel_mode
 
 
 def print_usage (show_help_line=False):
@@ -79,18 +79,6 @@ def gen_rand_pass (len):
     """
     alpha = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.choice(alpha) for i in range(len))
-
-
-def load_resel_mode (name):
-    """ Loads a reselection mode plugin by name.
-
-    Args:
-        name (str): The name of the mode to load (must correspond to module unde `./modes`).
-    Returns:
-        module: The loaded mode as a module.
-    """
-    mode = importlib.import_module(name)
-    return mode
 
 
 def try_launch_auth (file, policy):
