@@ -163,7 +163,7 @@ resel_mode = get_valued_arg('m')
 out = get_valued_arg('o')
 
 # Read data frame from file.
-df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True, encoding='latin-1')
+df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True)
 
 # Sort by probability and reset index.
 df.sort_values(by=['probability'], ascending=False, inplace=True)

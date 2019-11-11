@@ -21,7 +21,7 @@ def load_dict (path):
         with open(path, 'r') as target:
             for entry in target: # Load into memory.
                 dict.append(entry.strip()) # Strip whitespace.
-        dict_cache[path] = trie
+        dict_cache[path] = dict
     return dict_cache[path] # Get dictionary from cache.
 
 

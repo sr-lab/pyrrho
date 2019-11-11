@@ -6,6 +6,7 @@ import pandas as pd
 from composition.policy import complies
 
 from shared.args import get_valued_arg, is_arg_passed, get_int_valued_arg
+from shared.moduleloading import load_resel_mode
 
 
 def print_usage (show_help_line=False):
@@ -39,17 +40,23 @@ def print_help ():
     print('\t-i: Invert policy (filter all accepted, output only rejected)')
     print('\t-o <str>: The file in which to place output')
     print('Notes:')
-    print('\t[1]: Redistribution modes include:')
-    print('\t\t0: Elimination mode, eliminate outcomes only (breaks the distribution!)')
-    print('\t\t1: Renormalization mode, proportionally redistributes probability of eliminated outcomes')
-    print('\t\t2: Uniform mode, uniformly redistributes probability of eliminated outcomes')
-    print('\t\t3: Heavy-tail mode, places probability from all eliminated outcomes into most frequent outcome')
+    print('\t[1]: Bundled redistribution modes include:')
+    print('\t\tnone: No reselection mode, eliminate outcomes only (breaks the distribution!)')
+    print('\t\tproportional: Proportional reselection mode, proportionally redistributes probability of eliminated outcomes')
+    print('\t\tuniform: Uniform reselection mode, uniformly redistributes probability of eliminated outcomes')
+    print('\t\tconvergent: Convergent reselection mode, places probability from all eliminated outcomes into most frequent outcome')
+    print('\t\textraneous: Extraneous reselection mode, uniformly redistributes probability of eliminated outcomes to random passwords outside the set')
+    print('\t\custom: You may add your own reselection modes as Python files in the `./modes` folder')
     print()
     print('Input file should be in CSV format:')
     print('\tpassword, probability, ... <- Column headers')
     print('\t123456, 0.04362, ...')
     print('\thunter, 0.03712, ...')
     print('\tmatrix, 0.14325, ...')
+
+
+# Modes plugin directory needs to go in our path.
+sys.path.insert(0, './modes/')
 
 
 # If no options specified, print usage and exit.
@@ -80,9 +87,11 @@ letters = get_int_valued_arg('a')
 classes = get_int_valued_arg('c')
 words = get_int_valued_arg('w')
 invert = is_arg_passed('i')
+dict = get_valued_arg('dict')
+extras = []
 
 # Get redistribution mode.
-redist_mode = 0 if not is_arg_passed('m') else get_int_valued_arg('m')
+resel_mode = None if not is_arg_passed('m') else get_valued_arg('m')
 
 # Get output path if one was specified.
 out = get_valued_arg('o')
@@ -106,9 +115,11 @@ if classes is None:
     classes = 0
 if words is None:
     words = 0
+if dict is not None:
+    extras += ["dict:" + dict]
 
 # Read data frame from file.
-df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True, encoding='latin-1')
+df = pd.read_csv(file, skipinitialspace=True, skip_blank_lines=True)
 
 # Sort by probability and reset index.
 df.sort_values(by=['probability'], ascending=False, inplace=True)
@@ -118,7 +129,7 @@ df.reset_index(drop=True, inplace=True)
 total_prob = df['probability'].sum()
 
 # Filter passwords and reset index again.
-df = df[df.apply(lambda x: complies(str(x['password']), length, lowers, uppers, digits, symbols, letters, classes, words, [], invert), axis=1)]
+df = df[df.apply(lambda x: complies(str(x['password']), length, lowers, uppers, digits, symbols, letters, classes, words, extras, invert), axis=1)]
 df.reset_index(drop=True, inplace=True)
 
 # Get 'surplus' probability.
@@ -126,14 +137,10 @@ filtered_prob = df['probability'].sum()
 surplus = total_prob - filtered_prob
 row_count = len(df.index)
 
-# Soft filtration, flag noncompliant passwords as unguessable.
-if redist_mode == 1:
-    df['probability'] /= filtered_prob
-elif redist_mode == 2:
-    ech = surplus / row_count
-    df['probability'] += ech
-elif redist_mode == 3:
-    df.loc[0, 'probability'] += surplus
+# Different reselection modes.
+if resel_mode != None:
+    reselector = load_resel_mode(resel_mode)
+    df = reselector.reselect(total_prob, surplus, df)
 
 # Print data frame.
 df.to_csv(out if not out is None else sys.stdout, index=False)

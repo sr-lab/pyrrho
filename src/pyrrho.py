@@ -13,7 +13,7 @@ def print_usage (show_help_line=False):
         show_help_line (bool): If true, information on help flag `-h` will be printed.
     """
     print('Usage: python [-h] pyrrho.py <taskfile>')
-    print('Interprets a task file containing instructions for password probability distribuution transformation.')
+    print('Interprets a task file containing instructions for password probability distribution transformation.')
     if show_help_line:
         print('For extended help use \'-h\' option.')
 
@@ -25,7 +25,14 @@ def print_help ():
     print('Arguments:')
     print('\ttaskfile: The task file to run (see README.md)')
     print('Options:')
+    print('\t-t: Trusted mode [1]')
     print('\t-h: Show this help screen')
+    print('Notes:')
+    print('\t[1]: Trusted mode does uses pure Python for dataset filtration. It has pros and cons:')
+    print('\t\t+ It\'s much faster than using a Skeptic Authority extracted from Coq')
+    print('\t\t+ It\'s standalone, and doesn\'t require a Skeptic Authority or rely on inter-process communication')
+    print('\t\t- It\'s less flexible, and doesn\'t support the specification of arbitrary policies')
+    print('\t\t- It\'s obviousy not formally verified')
 
 
 # The total number of times to attempt to run the filtration script.
@@ -47,6 +54,33 @@ def compute_out_path (dir, file, policy, mode, ext='csv'):
     return os.path.join(dir, file_name)
 
 
+def unpack_policy (name):
+    """ Returns a list of flags for invoking `policyfilt.py` based on a policy name.
+
+    Args:
+        name (str): The policy name.
+    Return:
+        list of str: The list of flags.
+    """
+    return list(map(str, {
+        'basic7': ['-n', 7],
+        'basic8': ['-n', 8],
+        'basic9': ['-n', 9],
+        'basic12': ['-n', 12],
+        'basic14': ['-n', 14],
+        'basic16': ['-n', 16],
+        'basic20': ['-n', 20],
+        '2word12': ['-n', 12, '-w', 2],
+        '2word16': ['-n', 16, '-w', 2],
+        '2class12': ['-n', 12, '-c', 2],
+        '2class16': ['-n', 16, '-c', 2],
+        '3class12': ['-n', 12, '-c', 3],
+        '3class16': ['-n', 16, '-c', 3],
+        'comp8': ['-n', 8, '-c', 4, '-dict', './dict/openwall-tiny.dict'],
+        # NOTE: Add to this list for custom policies if required.
+    }[name]))
+
+
 # If no options specified, print usage and exit.
 if len(sys.argv) == 1:
     print_usage(True)
@@ -57,8 +91,11 @@ if is_arg_passed('h'):
     print_help()
     exit(0)
 
+# Trusted mode or not?
+trusted = is_arg_passed('t')
+
 # Load task from file.
-task = Task.load(sys.argv[1])
+task = Task.load(sys.argv[-1])
 
 # For each file the task specifies.
 for file in task.files:
@@ -75,12 +112,20 @@ for file in task.files:
             success = False
             while not success and retries <= FILT_RUN_RETRIES: # We might need to retry this several times.
                 try:
-                    subprocess.check_output(['python3', 'authfilt.py',
-                        '-a', task.authority,
-                        '-p', policy,
-                        '-m', mode,
-                        '-o', out_path,
-                        file])
+                    if trusted:
+                        # Pure Python policy filtration.
+                        subprocess.check_output(['python3', 'policyfilt.py'] + unpack_policy(policy) + [
+                            '-m', mode,
+                            '-o', out_path,
+                            file])
+                    else:
+                        # Filter using an application extracted from Coq.
+                        subprocess.check_output(['python3', 'authfilt.py',
+                            '-a', task.authority,
+                            '-p', policy,
+                            '-m', mode,
+                            '-o', out_path,
+                            file])
                     success = True
                 except:
                     print(f'Authority filtration process died. Retrying (attempt {retries + 1} of {FILT_RUN_RETRIES})...')
