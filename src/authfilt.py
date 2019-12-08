@@ -97,6 +97,11 @@ def try_launch_auth (file, policy):
             gl_auth_proc = (Popen([file, policy, str(GL_BATCH_SIZE)], stdin=PIPE, stdout=PIPE), file, policy)
             time.sleep(2 * (retries + 1)) # Wait, it might exit immediately if parameters are incorrect.
             success = gl_auth_proc[0].poll() == None
+            if success:
+                # Wait for state to come back from launched authority.
+                state = gl_auth_proc[0].stdout.readline().decode().strip().lower()
+                if state != "ready":
+                    success = false
         except:
             print(f'Authority launch failed, retrying (attempt {retries + 1} of {AUTH_LAUNCH_RETRIES})...', file=sys.stderr)
         retries += 1
@@ -115,12 +120,6 @@ def ask_auth (pwd):
     poll = gl_auth_proc[0].poll()
     if poll != None and not try_launch_auth(gl_auth_proc[1], gl_auth_proc[2]):
         print('Authority launch failed completely, aborting...', file=sys.stderr)
-        exit(1)
-    # Wait for state to come back from launched authority.
-    state = gl_auth_proc[0].stdout.readline().decode().strip().lower()
-    if state != "ready":
-        print(state, file=sys.stderr)
-        print('Authority did not indicate a ready state, aborting...', file=sys.stderr)
         exit(1)
     # Pass password into authority (don't forget to flush).
     gl_auth_proc[0].stdin.write(f'{pwd}\n'.encode())
