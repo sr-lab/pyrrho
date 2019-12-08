@@ -116,6 +116,12 @@ def ask_auth (pwd):
     if poll != None and not try_launch_auth(gl_auth_proc[1], gl_auth_proc[2]):
         print('Authority launch failed completely, aborting...', file=sys.stderr)
         exit(1)
+    # Wait for state to come back from launched authority.
+    state = gl_auth_proc[0].stdout.readline().decode().strip().lower()
+    if state != "ready":
+        print(state, file=sys.stderr)
+        print('Authority did not indicate a ready state, aborting...', file=sys.stderr)
+        exit(1)
     # Pass password into authority (don't forget to flush).
     gl_auth_proc[0].stdin.write(f'{pwd}\n'.encode())
     gl_auth_proc[0].stdin.flush()
